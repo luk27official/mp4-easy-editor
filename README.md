@@ -1,4 +1,6 @@
-# MP4 simple editor
+# MP4 simple editor (WIP)
+
+**NOT FINISHED, DO NOT USE YET**
 
 This repository contains files for my own Python MP4 video editor used to quickly cut MP4 videos and change the video volume.
 
