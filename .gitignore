@@ -1,6 +1,7 @@
 .vscode/
 *.mp4
 temp.mp3
+config.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
