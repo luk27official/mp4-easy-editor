@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import filedialog
 from tkSliderWidget import Slider
 from PIL import Image, ImageTk
+import json
+import os
 
 windowObjects = {}
 loadedVideo = None
@@ -37,7 +39,7 @@ def selectFile():
 
 
 def saveVideo():
-    pass
+    raise NotImplementedError
 
 
 def loadVideo(filename):
@@ -53,8 +55,13 @@ def loadVideo(filename):
         return None
 
 
-def createWindow():
+def createWindow(config):
     global windowObjects
+
+    if config is None:
+        print("Config is not defined. Exiting...")
+        return
+
     window = tk.Tk()
     window.title("Video Editor")
     window.geometry("1280x850")
@@ -79,7 +86,7 @@ def createWindow():
     windowObjects["volumeDesc"] = volumeDesc
 
     volumeTextBox = tk.Entry(canvas2)
-    volumeTextBox.insert(0, "100")
+    volumeTextBox.insert(0, config["volume"])
     volumeTextBox.pack(side=tk.LEFT)
     windowObjects["volumeTextBox"] = volumeTextBox
 
@@ -95,7 +102,10 @@ def createWindow():
 
 
 def main():
-    window = createWindow()
+    script_dir = os.path.abspath(os.path.dirname(__file__))
+    config = json.load(open(os.path.join(script_dir, "config.json"), "r"))
+
+    window = createWindow(config)
     window.mainloop()
 
     """
