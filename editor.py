@@ -7,23 +7,23 @@ from tkSliderWidget import Slider
 from PIL import Image, ImageTk
 
 windowObjects = {}
+loadedVideo = None
 
 
-def handleFileSelect():
-    global windowObjects
+def handleFileSelect(event=None):
+    global windowObjects, loadedVideo
 
     file = selectFile()
-    video = loadVideo(file)
-    if video is not None:
-        videoFrame = video.get_frame(0)
-        img = Image.fromarray(videoFrame)
-        img = img.resize((1000, 500))
+    loadedVideo = loadVideo(file)
+    if loadedVideo is not None:
+        windowObjects["videoName"].config(text=file)
+
+        videoFrame = loadedVideo.get_frame(0)
+        img = Image.fromarray(videoFrame).resize((1280, 720))
         ph = ImageTk.PhotoImage(img)
 
         windowObjects["canvas"].create_image(0, 0, image=ph, anchor=tk.NW)
         windowObjects["canvas"].image = ph
-
-        print(video)
 
 
 def selectFile():
@@ -34,6 +34,10 @@ def selectFile():
     )
 
     return filename
+
+
+def saveVideo():
+    pass
 
 
 def loadVideo(filename):
@@ -53,33 +57,39 @@ def createWindow():
     global windowObjects
     window = tk.Tk()
     window.title("Video Editor")
-    window.geometry("1280x720")
+    window.geometry("1280x850")
+    window.resizable(True, True)
 
-    fileSelect = tk.Button(window, text="Select File", command=handleFileSelect)
-    fileSelect.pack()
-    windowObjects["fileSelect"] = fileSelect
-
-    canvas = tk.Canvas(window, width=1000, height=500)
-    # color canvas
+    canvas = tk.Canvas(window, width=1280, height=720)
+    canvas.bind("<Button-1>", handleFileSelect)  # on click
+    canvas.create_text(640, 360, text="Click to select a video file")
     canvas.pack()
     windowObjects["canvas"] = canvas
 
-    lengthSlider = Slider(window, 1000, 80, 0, 100, [20, 80], True)
+    lengthSlider = Slider(window, 1280, 80, 0, 1, [0.2, 0.8], True)
     lengthSlider.pack()
     windowObjects["lengthSlider"] = lengthSlider
 
-    canvas2 = tk.Canvas(window, width=1000, height=200)
+    canvas2 = tk.Canvas(window, width=1280, height=50)
     canvas2.pack()
     windowObjects["canvas2"] = canvas2
 
     volumeDesc = tk.Label(canvas2, text="Volume")
-    volumeDesc.pack()
+    volumeDesc.pack(side=tk.LEFT)
     windowObjects["volumeDesc"] = volumeDesc
 
     volumeTextBox = tk.Entry(canvas2)
     volumeTextBox.insert(0, "100")
-    volumeTextBox.pack()
+    volumeTextBox.pack(side=tk.LEFT)
     windowObjects["volumeTextBox"] = volumeTextBox
+
+    videoName = tk.Label(canvas2, text="No video selected")
+    videoName.pack(side=tk.LEFT)
+    windowObjects["videoName"] = videoName
+
+    saveVideoButton = tk.Button(canvas2, text="Save Video", command=saveVideo)
+    saveVideoButton.pack(side=tk.RIGHT)
+    windowObjects["saveVideoButton"] = saveVideoButton
 
     return window
 
