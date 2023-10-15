@@ -12,7 +12,8 @@ from threading import Thread, Timer
 windowObjects = {}
 loadedVideo = None
 loadedVideoFileName = ""
-lastChangedValues = [0, 0]
+lastChangedValues = [0, 1]
+videoPlaying = False
 
 
 def handleFileSelect(event=None):
@@ -49,7 +50,6 @@ def changeVideoFrame(frameNumber):
     img = Image.fromarray(videoFrame).resize((1280, 720))
     ph = ImageTk.PhotoImage(img)
 
-    canvas.delete("all")
     canvas.create_image(0, 0, image=ph, anchor=tk.NW)
     canvas.image = ph
 
@@ -115,10 +115,7 @@ def handleSliderChange(values):
     if loadedVideo is None:
         return
 
-    if values == lastChangedValues:
-        return
-
-    changeToStart = values[0] < lastChangedValues[0]
+    changeToStart = values[0] != lastChangedValues[0] or (values[0] == 0)
 
     videoStart = loadedVideo.duration * values[0]
     videoEnd = loadedVideo.duration * values[1]
@@ -130,14 +127,41 @@ def handleSliderChange(values):
         text="Video End: " + "{:.2f}".format(videoEnd) + " s"
     )
 
-    print(values)
-
     lastChangedValues = values
 
     if changeToStart:
         debounce(changeVideoFrame(videoStart))
     else:
-        debounce(changeVideoFrame(videoEnd))
+        debounce(changeVideoFrame(videoEnd - 1))
+
+
+def playVideo():
+    global loadedVideo, videoPlaying, lastChangedValues, windowObjects
+
+    if videoPlaying:
+        return
+
+    videoPlaying = True
+
+    if loadedVideo is None:
+        return
+
+    videoStart = loadedVideo.duration * lastChangedValues[0]
+    videoEnd = loadedVideo.duration * lastChangedValues[1]
+
+    while videoStart < videoEnd:
+        if not videoPlaying:
+            break
+        changeVideoFrame(videoStart)
+        windowObjects["videoCurrentDesc"].config(
+            text="Video Current: " + "{:.2f}".format(videoStart) + " s"
+        )
+        videoStart += 0.1
+
+
+def stopVideo():
+    global videoPlaying
+    videoPlaying = False
 
 
 def createWindow(config):
@@ -158,7 +182,7 @@ def createWindow(config):
     canvas.pack()
     windowObjects["canvas"] = canvas
 
-    lengthSlider = Slider(window, 1280, 80, 0, 1, [0.2, 0.8], False)
+    lengthSlider = Slider(window, 1280, 80, 0, 1, [0, 1], False)
     lengthSlider.setValueChageCallback(lambda values: handleSliderChange(values))
     lengthSlider.pack()
     windowObjects["lengthSlider"] = lengthSlider
@@ -180,6 +204,15 @@ def createWindow(config):
     videoName.pack(side=tk.LEFT)
     windowObjects["videoName"] = videoName
 
+    playVideoThreaded = lambda: Thread(target=playVideo).start()
+    videoPlayBtn = tk.Button(canvas2, text="Play Video", command=playVideoThreaded)
+    videoPlayBtn.pack(side=tk.RIGHT)
+    windowObjects["videoPlayBtn"] = videoPlayBtn
+
+    stopVideoBtn = tk.Button(canvas2, text="Stop Video", command=stopVideo)
+    stopVideoBtn.pack(side=tk.RIGHT)
+    windowObjects["stopVideoBtn"] = stopVideoBtn
+
     saveVideoPartial = lambda: saveVideo(config)
     saveVideoButton = tk.Button(canvas2, text="Save Video", command=saveVideoPartial)
     saveVideoButton.pack(side=tk.RIGHT)
@@ -196,6 +229,10 @@ def createWindow(config):
     videoEndDesc = tk.Label(canvas3, text="Video End: N/A")
     videoEndDesc.pack(side=tk.LEFT)
     windowObjects["videoEndDesc"] = videoEndDesc
+
+    videoCurrentDesc = tk.Label(canvas3, text="Video Current: N/A")
+    videoCurrentDesc.pack(side=tk.LEFT)
+    windowObjects["videoCurrentDesc"] = videoCurrentDesc
 
     return window
 
