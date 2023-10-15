@@ -3,6 +3,7 @@
 import os
 import json
 from threading import Thread, Timer
+import multiprocessing
 
 import moviepy.editor as mp
 
@@ -27,9 +28,10 @@ def handleFileSelect(event=None):
     loadedVideoFileName = file
     loadedVideo = loadVideo(file)
     if loadedVideo is not None:
+        values = windowObjects["lengthSlider"].getValues()
+        handleSliderChange(values)
         windowObjects["videoName"].config(text=file)
-
-    changeVideoFrame(0)
+        changeVideoFrame(values[0] * loadedVideo.duration)
 
 
 def selectFile():
@@ -46,6 +48,9 @@ def changeVideoFrame(frameNumber):
     global loadedVideo
 
     canvas = windowObjects["canvas"]
+    windowObjects["videoCurrentDesc"].config(
+        text="Video Current: " + "{:.2f}".format(frameNumber) + " s"
+    )
 
     if loadedVideo is None:
         return
@@ -142,8 +147,8 @@ def playAudio(start, end):
     audio = audio.subclip(start, end)
     # play audio
     audio.write_audiofile("temp.mp3")
-    playAudioThreaded = lambda: playsound("temp.mp3", True)
-    Thread(target=playAudioThreaded).start()
+
+    return multiprocessing.Process(target=playsound, args=("temp.mp3",))
 
 
 def playVideo():
@@ -160,15 +165,14 @@ def playVideo():
     videoStart = loadedVideo.duration * lastChangedValues[0]
     videoEnd = loadedVideo.duration * lastChangedValues[1]
 
-    playAudio(videoStart, videoEnd)
+    player = playAudio(videoStart, videoEnd)
+    player.start()
 
     while videoStart < videoEnd:
         if not videoPlaying:
+            player.terminate()
             break
         changeVideoFrame(videoStart)
-        windowObjects["videoCurrentDesc"].config(
-            text="Video Current: " + "{:.2f}".format(videoStart) + " s"
-        )
         videoStart += 0.1
 
     os.remove("temp.mp3")
