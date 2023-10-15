@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
+import os
+import json
+from threading import Thread, Timer
+
 import moviepy.editor as mp
+
 import tkinter as tk
 from tkinter import filedialog
 from tkSliderWidget import Slider
 from PIL import Image, ImageTk
-import json
-import os
-from threading import Thread, Timer
+
+from playsound import playsound
 
 windowObjects = {}
 loadedVideo = None
@@ -64,11 +68,7 @@ def saveVideo(config):
     volume = float(windowObjects["volumeTextBox"].get()) / 100
     length = windowObjects["lengthSlider"].getValues()
 
-    print(volume)
-    print(length)
-
     realLength = [loadedVideo.duration * length[0], loadedVideo.duration * length[1]]
-    print(realLength)
 
     Thread(target=saveVideoThreaded, args=(config, volume, realLength)).start()
 
@@ -135,6 +135,17 @@ def handleSliderChange(values):
         debounce(changeVideoFrame(videoEnd - 1))
 
 
+def playAudio(start, end):
+    global loadedVideo
+
+    audio = loadedVideo.audio
+    audio = audio.subclip(start, end)
+    # play audio
+    audio.write_audiofile("temp.mp3")
+    playAudioThreaded = lambda: playsound("temp.mp3", True)
+    Thread(target=playAudioThreaded).start()
+
+
 def playVideo():
     global loadedVideo, videoPlaying, lastChangedValues, windowObjects
 
@@ -149,6 +160,8 @@ def playVideo():
     videoStart = loadedVideo.duration * lastChangedValues[0]
     videoEnd = loadedVideo.duration * lastChangedValues[1]
 
+    playAudio(videoStart, videoEnd)
+
     while videoStart < videoEnd:
         if not videoPlaying:
             break
@@ -157,6 +170,8 @@ def playVideo():
             text="Video Current: " + "{:.2f}".format(videoStart) + " s"
         )
         videoStart += 0.1
+
+    os.remove("temp.mp3")
 
 
 def stopVideo():
