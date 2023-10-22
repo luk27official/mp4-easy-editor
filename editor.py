@@ -11,6 +11,7 @@ import tkinter as tk
 from tkinter import filedialog
 from tkSliderWidget import Slider
 from PIL import Image, ImageTk
+from tkinterdnd2 import DND_FILES, TkinterDnD
 
 from playsound import playsound
 
@@ -22,16 +23,8 @@ videoPlaying = False
 
 
 def handleFileSelect(event=None):
-    global windowObjects, loadedVideo, loadedVideoFileName
-
     file = selectFile()
-    loadedVideoFileName = file
-    loadedVideo = loadVideo(file)
-    if loadedVideo is not None:
-        values = windowObjects["lengthSlider"].getValues()
-        handleSliderChange(values)
-        windowObjects["videoName"].config(text=file)
-        changeVideoFrame(values[0] * loadedVideo.duration)
+    processSelectedFile(file)
 
 
 def selectFile():
@@ -42,6 +35,18 @@ def selectFile():
     )
 
     return filename
+
+
+def processSelectedFile(file):
+    global windowObjects, loadedVideo, loadedVideoFileName
+
+    loadedVideoFileName = file
+    loadedVideo = loadVideo(file)
+    if loadedVideo is not None:
+        values = windowObjects["lengthSlider"].getValues()
+        handleSliderChange(values)
+        windowObjects["videoName"].config(text=file)
+        changeVideoFrame(values[0] * loadedVideo.duration)
 
 
 def changeVideoFrame(frameNumber):
@@ -190,13 +195,18 @@ def createWindow(config):
         print("Config is not defined. Exiting...")
         return
 
-    window = tk.Tk()
+    window = TkinterDnD.Tk()
+    # window = tk.Tk()
     window.title("Video Editor")
     window.geometry("1280x850")
     window.resizable(False, False)
 
     canvas = tk.Canvas(window, width=1280, height=720)
     canvas.bind("<Button-1>", handleFileSelect)  # on click
+    canvas.drop_target_register(DND_FILES)
+    canvas.dnd_bind(
+        "<<Drop>>", lambda e: processSelectedFile(e.data)
+    )  # on drag and drop
     canvas.create_text(640, 360, text="Click to select a video file")
     canvas.pack()
     windowObjects["canvas"] = canvas
