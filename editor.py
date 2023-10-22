@@ -38,6 +38,13 @@ class VideoEditor:
         return filename
 
     def processSelectedFile(self, file):
+        # remove brackets from file name
+        if file[0] == "{" and file[-1] == "}":
+            file = file[1:-1]
+
+        if file == "":
+            return
+
         self.loadedVideoFileName = file
         self.loadedVideo = self.loadVideo(file)
         if self.loadedVideo is not None:
