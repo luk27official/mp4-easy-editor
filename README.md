@@ -7,6 +7,7 @@ The video editor is rather simple and used mostly for my purposes. There are a f
 ## Features
 
 - drag and drop video upload
+- compress MP4 videos while keeping FPS the same
 - quickly cut videos with timeline slider
 - adjust video volume
 - preview cut video directly in the editor
