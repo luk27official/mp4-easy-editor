@@ -139,7 +139,7 @@ class VideoEditor:
         # play audio
         audio.write_audiofile("temp.mp3")
 
-        return multiprocessing.Process(target=self.playsound, args=("temp.mp3",))
+        return multiprocessing.Process(target=playsound, args=("temp.mp3",))
 
     def playVideo(self):
         if self.videoPlaying:
