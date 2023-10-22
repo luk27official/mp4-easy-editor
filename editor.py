@@ -39,8 +39,8 @@ class VideoEditor:
 
     def processSelectedFile(self, file):
         self.loadedVideoFileName = file
-        loadedVideo = self.loadVideo(file)
-        if loadedVideo is not None:
+        self.loadedVideo = self.loadVideo(file)
+        if self.loadedVideo is not None:
             values = self.windowObjects["lengthSlider"].getValues()
             self.handleSliderChange(values)
             self.windowObjects["videoName"].config(text=file)
