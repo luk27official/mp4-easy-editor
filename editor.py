@@ -117,6 +117,9 @@ class VideoEditor:
         if self.loadedVideo is None:
             return
 
+        if self.videoPlaying:  # if video is playing, don't change the frame
+            return
+
         changeToStart = values[0] != self.lastChangedValues[0] or (values[0] == 0)
 
         videoStart = self.loadedVideo.duration * values[0]
