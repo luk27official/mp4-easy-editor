@@ -31,9 +31,7 @@ class VideoEditor:
     def selectFile(self):
         filetypes = (("MP4 files", "*.mp4"), ("All files", "*.*"))
 
-        filename = filedialog.askopenfilename(
-            title="Open a video file", initialdir="/", filetypes=filetypes
-        )
+        filename = filedialog.askopenfilename(title="Open a video file", initialdir="/", filetypes=filetypes)
 
         return filename
 
@@ -55,9 +53,7 @@ class VideoEditor:
 
     def changeVideoFrame(self, frameNumber):
         canvas = self.windowObjects["canvas"]
-        self.windowObjects["videoCurrentDesc"].config(
-            text="Video Current: " + "{:.2f}".format(frameNumber) + " s"
-        )
+        self.windowObjects["videoCurrentDesc"].config(text="Video Current: " + "{:.2f}".format(frameNumber) + " s")
 
         if self.loadedVideo is None:
             return
@@ -126,12 +122,8 @@ class VideoEditor:
         videoStart = self.loadedVideo.duration * values[0]
         videoEnd = self.loadedVideo.duration * values[1]
 
-        self.windowObjects["videoStartDesc"].config(
-            text="Video Start: " + "{:.2f}".format(videoStart) + " s"
-        )
-        self.windowObjects["videoEndDesc"].config(
-            text="Video End: " + "{:.2f}".format(videoEnd) + " s"
-        )
+        self.windowObjects["videoStartDesc"].config(text="Video Start: " + "{:.2f}".format(videoStart) + " s")
+        self.windowObjects["videoEndDesc"].config(text="Video End: " + "{:.2f}".format(videoEnd) + " s")
 
         self.lastChangedValues = values
 
@@ -188,17 +180,13 @@ class VideoEditor:
         canvas = tk.Canvas(window, width=1280, height=720)
         canvas.bind("<Button-1>", self.handleFileSelect)  # on click
         canvas.drop_target_register(DND_FILES)
-        canvas.dnd_bind(
-            "<<Drop>>", lambda e: self.processSelectedFile(e.data)
-        )  # on drag and drop
+        canvas.dnd_bind("<<Drop>>", lambda e: self.processSelectedFile(e.data))  # on drag and drop
         canvas.create_text(640, 360, text="Click to select a video file")
         canvas.pack()
         self.windowObjects["canvas"] = canvas
 
         lengthSlider = Slider(window, 1280, 80, 0, 1, [0, 1], False)
-        lengthSlider.setValueChageCallback(
-            lambda values: self.handleSliderChange(values)
-        )
+        lengthSlider.setValueChageCallback(lambda values: self.handleSliderChange(values))
         lengthSlider.pack()
         self.windowObjects["lengthSlider"] = lengthSlider
 
@@ -229,9 +217,7 @@ class VideoEditor:
         self.windowObjects["stopVideoBtn"] = stopVideoBtn
 
         saveVideoPartial = lambda: self.saveVideo(config)
-        saveVideoButton = tk.Button(
-            canvas2, text="Save Video", command=saveVideoPartial
-        )
+        saveVideoButton = tk.Button(canvas2, text="Save Video", command=saveVideoPartial)
         saveVideoButton.pack(side=tk.RIGHT)
         self.windowObjects["saveVideoButton"] = saveVideoButton
 
