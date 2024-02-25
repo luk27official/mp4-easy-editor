@@ -1,1 +1,0 @@
-tkSliderWidget/tkSliderWidget.py
