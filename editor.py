@@ -36,12 +36,12 @@ class VideoEditor:
         return filename
 
     def processSelectedFile(self, file):
+        if file == "":
+            return
+
         # remove brackets from file name
         if file[0] == "{" and file[-1] == "}":
             file = file[1:-1]
-
-        if file == "":
-            return
 
         self.loadedVideoFileName = file
         self.loadedVideo = self.loadVideo(file)
@@ -136,6 +136,9 @@ class VideoEditor:
             self.debounce(self.changeVideoFrame(videoEnd - 1))
 
     def playAudio(self, start, end):
+        if self.loadedVideo is None or self.loadedVideo.audio is None:
+            return
+
         audio = self.loadedVideo.audio
         audio = audio.subclip(start, end)
         # play audio
