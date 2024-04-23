@@ -24,7 +24,7 @@ class VideoEditor:
         self.lastChangedValues = [0, 1]
         self.videoPlaying = False
 
-    def handleFileSelect(self, event=None):
+    def handleFileSelect(self):
         file = self.selectFile()
         self.processSelectedFile(file)
 
@@ -35,7 +35,7 @@ class VideoEditor:
 
         return filename
 
-    def processSelectedFile(self, file):
+    def processSelectedFile(self, file: str):
         if file == "":
             return
 
@@ -51,7 +51,7 @@ class VideoEditor:
             self.windowObjects["videoName"].config(text=file)
             self.changeVideoFrame(values[0] * self.loadedVideo.duration)
 
-    def changeVideoFrame(self, frameNumber):
+    def changeVideoFrame(self, frameNumber: float):
         canvas = self.windowObjects["canvas"]
         self.windowObjects["videoCurrentDesc"].config(text="Video Current: " + "{:.2f}".format(frameNumber) + " s")
 
@@ -65,7 +65,7 @@ class VideoEditor:
         canvas.create_image(0, 0, image=ph, anchor=tk.NW)
         canvas.image = ph
 
-    def saveVideo(self, config):
+    def saveVideo(self, config: dict):
         if self.loadedVideo is None:
             print("No video loaded.")
             return
@@ -80,14 +80,14 @@ class VideoEditor:
 
         Thread(target=self.saveVideoThreaded, args=(config, volume, realLength)).start()
 
-    def saveVideoThreaded(self, config, volume, length):
+    def saveVideoThreaded(self, config: dict, volume: float, length: float):
         newVideo = self.loadedVideo.subclip(length[0], length[1])
         newVideo = newVideo.volumex(volume)
 
         fileNameWithoutExtension = os.path.splitext(self.loadedVideoFileName)[0]
         newVideo.write_videofile(fileNameWithoutExtension + config["newFileName"])
 
-    def loadVideo(self, filename):
+    def loadVideo(self, filename: str):
         if filename == "":
             return None
 
@@ -99,7 +99,7 @@ class VideoEditor:
             print(e)
             return None
 
-    def debounce(self, func, delay=0.05):
+    def debounce(self, func: function, delay: float = 0.05):
         def debounced(*args, **kwargs):
             debounced.timer = None
 
@@ -113,7 +113,7 @@ class VideoEditor:
 
         return debounced
 
-    def handleSliderChange(self, values):
+    def handleSliderChange(self, values: list[float]):
         if self.loadedVideo is None:
             return
 
@@ -135,7 +135,7 @@ class VideoEditor:
         else:
             self.debounce(self.changeVideoFrame(videoEnd - 1))
 
-    def playAudio(self, start, end):
+    def playAudio(self, start: float, end: float):
         if self.loadedVideo is None or self.loadedVideo.audio is None:
             return
 
@@ -173,7 +173,7 @@ class VideoEditor:
     def stopVideo(self):
         self.videoPlaying = False
 
-    def createWindow(self, config):
+    def createWindow(self, config: dict):
         if config is None:
             print("Config is not defined. Exiting...")
             return
